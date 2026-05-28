@@ -1,6 +1,18 @@
 import React from 'react';
 import './projects.scss';
 
+const statusLabels = {
+  0: 'U pripremi',
+  1: 'U realizaciji',
+  2: 'Kompletiran',
+  3: 'Arhiviran'
+};
+
+const getStatusLabel = (status) => {
+  const value = typeof status === 'number' ? status : Number(status);
+  return statusLabels[value] || statusLabels[status] || 'Nepoznat status';
+};
+
 const ProjectList = ({ projects, onSelectProject }) => {
   return (
     <div className="project-list">
@@ -19,7 +31,7 @@ const ProjectList = ({ projects, onSelectProject }) => {
           </div>
           <p className="project-description">{project.description}</p>
           <div className="project-meta">
-            <span className="project-status">Status: {project.status}</span>
+            <span className="project-status">Status: {getStatusLabel(project.status)}</span>
             <span>Započet: {new Date(project.startedAt).toLocaleDateString()}</span>
             {project.completedAt && (
               <span>Završen: {new Date(project.completedAt).toLocaleDateString()}</span>
