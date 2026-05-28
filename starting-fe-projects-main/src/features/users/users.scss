@@ -1,0 +1,104 @@
+// Auth forms
+.auth-container {
+  max-width: 400px;
+  margin: 50px auto;
+}
+
+.auth-form {
+  padding: 30px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+
+  .form-group {
+    margin-bottom: 15px;
+    label { display: block; margin-bottom: 5px; }
+  }
+
+  .form-actions {
+    margin-top: 15px;
+    text-align: center;
+  }
+}
+
+// Profile
+.profile-container {
+  max-width: 600px;
+  margin: 50px auto;
+}
+
+.profile-card {
+  @extend .auth-form;
+}
+
+.profile-fields {
+  margin-top: 20px;
+  
+  > div {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 4px;
+
+    strong {
+      color: #555;
+    }
+
+    span {
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
+  }
+}
+
+// User page layout
+.user-page-wrapper {
+  display: flex;
+  height: calc(100vh - 110px);
+  gap: 0;
+}
+
+// User list (left panel - 30%)
+.user-list-container {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+
+  .user-list-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+    align-items: center;
+  }
+
+  .user-list {
+    flex: 1;
+    overflow-y: auto;
+
+    .user-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+
+      &.active {
+        background-color: #e8f0fe;
+      }
+    }
+  }
+}
+
+// Project panel (right panel - 70%)
+.project-panel {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 10px;
+}

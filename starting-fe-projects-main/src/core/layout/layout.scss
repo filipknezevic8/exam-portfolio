@@ -1,0 +1,40 @@
+// Header
+.header {
+  background-color: #333;
+  padding: 15px 30px;
+  color: white;
+
+  nav {
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-links {
+    width: 100%;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+}
+
+// Home
+.home-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .welcome-text { font-size: 18px; }
+  
+  .features-box {
+    margin-top: 50px;
+
+    ul {
+      line-height: 2;
+      padding: 20px;
+    }
+  }
+}

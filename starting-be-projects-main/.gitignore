@@ -1,0 +1,32 @@
+# Build artifacts
+bin/
+obj/
+log/
+logs/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# EF Core temporary build outputs
+Migrations/obj/
+Migrations/bin/
+
+# Configuration secrets
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+.env
+
+# IDE/editor stuff
+.idea/
+.vscode/
+
+# Node/npm (if you have a SPA frontend)
+node_modules/
+dist/
+
+# Test and coverage outputs
+TestResults/
+coverage/
