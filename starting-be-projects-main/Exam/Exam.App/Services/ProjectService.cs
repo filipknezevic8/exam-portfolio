@@ -44,6 +44,7 @@ public class ProjectService : IProjectService
 
         project.Name = dto.Name;
         project.Description = dto.Description;
+        project.StartedAt = dto.StartedAt;
 
         await _projectRepository.UpdateAsync(project);
         return _mapper.Map<ProjectDto>(project);

@@ -15,6 +15,7 @@ const MyProjects = () => {
   const [error, setError] = useState('');
 
   const [editingProjectId, setEditingProjectId] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -43,11 +44,14 @@ const MyProjects = () => {
   };
 
   const handleSelectProject = (projectId) => {
-    const project = projects.find(p => p.id === projectId);
+    const project = projects.find((p) => p.id === projectId);
     if (!project) return;
+
     setIsCreating(false);
     setEditingProjectId(projectId);
+    setSelectedProjectId(projectId);
     setFormError('');
+
     reset({
       name: project.name,
       description: project.description,
@@ -57,6 +61,7 @@ const MyProjects = () => {
 
   const handleNewProject = () => {
     setEditingProjectId(null);
+    setSelectedProjectId(null);
     setIsCreating(true);
     setFormError('');
     reset({ name: '', description: '', startedAt: '' });
@@ -80,6 +85,7 @@ const MyProjects = () => {
 
       await fetchProjects();
       setEditingProjectId(null);
+      setSelectedProjectId(null);
       setIsCreating(false);
       reset({ name: '', description: '', startedAt: '' });
     } catch (err) {
@@ -96,6 +102,7 @@ const MyProjects = () => {
       await deleteProject(editingProjectId);
       await fetchProjects();
       setEditingProjectId(null);
+      setSelectedProjectId(null);
       setIsCreating(false);
       reset({ name: '', description: '', startedAt: '' });
     } catch (err) {
@@ -115,13 +122,21 @@ const MyProjects = () => {
             Dodaj novi projekat
           </button>
         </div>
+
         {loading && <p>Učitavanje...</p>}
         {error && <p className="error-message">{error}</p>}
+
         {!loading && !error && projects.length === 0 && (
           <p style={{ padding: '20px' }}>Nemate projekata.</p>
         )}
+
         {!loading && !error && projects.length > 0 && (
-          <ProjectList projects={projects} onSelectProject={handleSelectProject} />
+          <ProjectList
+            projects={projects}
+            onSelectProject={handleSelectProject}
+            selectedProjectId={selectedProjectId}
+            showAllStatuses={true}
+          />
         )}
       </div>
 
@@ -163,6 +178,7 @@ const MyProjects = () => {
               <button type="submit" className="btn btn-primary" disabled={saving}>
                 {saving ? 'Čuvanje...' : 'Sačuvaj'}
               </button>
+
               {!isCreating && editingProjectId && (
                 <button
                   type="button"
