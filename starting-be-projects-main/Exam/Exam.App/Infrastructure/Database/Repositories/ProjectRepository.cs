@@ -32,6 +32,15 @@ public class ProjectRepository : IProjectRepository
             .ToListAsync();
     }
 
+    public async Task<List<Project>> GetVisibleByUserIdAsync(string userId)
+    {
+        return await _context.Projects
+            .Where(p =>
+                p.UserId == userId &&
+                (p.Status == ProjectStatus.Published || p.Status == ProjectStatus.Completed))
+            .ToListAsync();
+    }
+
     public async Task UpdateAsync(Project project)
     {
         _context.Projects.Update(project);

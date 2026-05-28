@@ -56,7 +56,7 @@ public class ProjectService : IProjectService
 
     public async Task<List<ProjectDto>> GetByUserIdAsync(string userId)
     {
-        var projects = await _projectRepository.GetByUserIdAsync(userId);
+        var projects = await _projectRepository.GetVisibleByUserIdAsync(userId);
         return _mapper.Map<List<ProjectDto>>(projects);
     }
 

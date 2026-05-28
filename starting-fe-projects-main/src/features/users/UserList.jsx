@@ -56,6 +56,7 @@ const UserList = () => {
     setProjectsLoading(true);
     setProjectsError('');
     setProjects(null);
+
     try {
       const data = await getProjectsByUser(userId);
       setProjects(data);
@@ -84,12 +85,12 @@ const UserList = () => {
             &gt;
           </button>
         </div>
-        <hr></hr>
+        <hr />
         <div className="user-list">
           {loading && <p>Učitavanje...</p>}
           {error && <p className="error-message">{error}</p>}
-          {!loading && !error && users.map((u, index) => (
-            <div key={index} className={`user-row ${selectedUserId === u.id ? 'active' : ''}`}>
+          {!loading && !error && users.map((u) => (
+            <div key={u.id} className={`user-row ${selectedUserId === u.id ? 'active' : ''}`}>
               <span>{u.name} {u.surname}</span>
               <button className="btn btn-sm" onClick={() => handleShowProjects(u.id)}>
                 Projekti
@@ -106,7 +107,7 @@ const UserList = () => {
           <p>Korisnik nema aktivnih projekata.</p>
         )}
         {!projectsLoading && !projectsError && projects && projects.length > 0 && (
-          <ProjectList projects={projects} />
+          <ProjectList projects={projects} showAllStatuses={false} />
         )}
       </div>
     </div>
