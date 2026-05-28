@@ -15,9 +15,22 @@ public class UserRepository : IUserRepository
 
     public async Task<PaginatedList<ApplicationUser>> GetAllAsync(int page, int pageSize)
     {
-        var totalCount = await _context.Users.CountAsync();
+        var usersQuery =
+            from user in _context.Users
+            join userRole in _context.UserRoles on user.Id equals userRole.UserId
+            join role in _context.Roles on userRole.RoleId equals role.Id
+            where role.Name == "User"
+            select user;
 
-        var items = await _context.Users
+        usersQuery = usersQuery
+            .Distinct()
+            .OrderBy(u => u.Name)
+            .ThenBy(u => u.Surname)
+            .ThenBy(u => u.UserName);
+
+        var totalCount = await usersQuery.CountAsync();
+
+        var items = await usersQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
