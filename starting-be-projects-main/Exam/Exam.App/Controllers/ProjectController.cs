@@ -29,14 +29,16 @@ public class ProjectController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] ProjectDto dto)
     {
-        var result = await _projectService.UpdateAsync(id, dto);
+        var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await _projectService.UpdateAsync(id, dto, username);
         return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _projectService.DeleteAsync(id);
+        var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        await _projectService.DeleteAsync(id, username);
         return Ok();
     }
 
