@@ -25,7 +25,7 @@ public class ProjectService : IProjectService
         var user = await _userManager.FindByNameAsync(username);
         if (user == null)
         {
-            throw new UnauthorizedException("Korisnik nije pronađen.");
+            throw new UnauthorizedException("Korisnik nije prijavljen.");
         }
 
         var project = new Project
@@ -61,49 +61,84 @@ public class ProjectService : IProjectService
             throw new UnauthorizedException("Nemate pravo da menjate ovaj projekat.");
         }
 
-        project.Name = dto.Name;
-        project.Description = dto.Description;
-        project.StartedAt = dto.StartedAt;
-
-        if (dto.Status.HasValue)
+        if (project.Status == ProjectStatus.Completed)
         {
-            project.Status = dto.Status.Value;
-
-            if (project.Status == ProjectStatus.Draft)
+            if (project.Name != dto.Name || project.Description != dto.Description || project.StartedAt != dto.StartedAt)
             {
+                throw new BadRequestException("Kompletiran projekat nije moguće menjati.");
+            }
+
+            if (dto.Status.HasValue && dto.Status.Value == ProjectStatus.Draft)
+            {
+                project.Status = ProjectStatus.Draft;
                 project.CompletedAt = null;
             }
         }
-
-        if (dto.CompletedAt.HasValue)
+        else
         {
-            project.CompletedAt = dto.CompletedAt;
+            project.Name = dto.Name;
+            project.Description = dto.Description;
+            project.StartedAt = dto.StartedAt;
+
+            if (dto.Status.HasValue)
+            {
+                project.Status = dto.Status.Value;
+                if (project.Status == ProjectStatus.Draft)
+                {
+                    project.CompletedAt = null;
+                }
+            }
         }
 
         await _projectRepository.UpdateAsync(project);
         return _mapper.Map<ProjectDto>(project);
     }
 
+    public async Task<ProjectDto> StartAsync(int id, string username)
+    {
+        var project = await GetOwnedProjectAsync(id, username);
+        if (project.Status != ProjectStatus.Draft)
+        {
+            throw new BadRequestException("Samo projekat u pripremi može da se započne.");
+        }
+
+        project.Status = ProjectStatus.Published;
+        await _projectRepository.UpdateAsync(project);
+        return _mapper.Map<ProjectDto>(project);
+    }
+
+    public async Task<ProjectDto> ConcludeAsync(int id, string username)
+    {
+        var project = await GetOwnedProjectAsync(id, username);
+        if (project.Status != ProjectStatus.Published)
+        {
+            throw new BadRequestException("Samo projekat u realizaciji može da se zaključi.");
+        }
+
+        project.Status = ProjectStatus.Completed;
+        project.CompletedAt = DateTime.UtcNow;
+        await _projectRepository.UpdateAsync(project);
+        return _mapper.Map<ProjectDto>(project);
+    }
+
+    public async Task<ProjectDto> ReopenAsync(int id, string username)
+    {
+        var project = await GetOwnedProjectAsync(id, username);
+        if (project.Status != ProjectStatus.Completed)
+        {
+            throw new BadRequestException("Samo kompletiran projekat može da se vrati u pripremu.");
+        }
+
+        project.Status = ProjectStatus.Draft;
+        project.CompletedAt = null;
+        await _projectRepository.UpdateAsync(project);
+        return _mapper.Map<ProjectDto>(project);
+    }
+
     public async Task DeleteAsync(int id, string username)
     {
-        var currentUser = await _userManager.FindByNameAsync(username);
-        if (currentUser == null)
-        {
-            throw new UnauthorizedException("Korisnik nije prijavljen.");
-        }
-
-        var project = await _projectRepository.GetByIdAsync(id);
-        if (project == null)
-        {
-            throw new NotFoundException(id);
-        }
-
-        if (project.UserId != currentUser.Id)
-        {
-            throw new UnauthorizedException("Nemate pravo da obrišete ovaj projekat.");
-        }
-
-        await _projectRepository.DeleteAsync(id);
+        var project = await GetOwnedProjectAsync(id, username);
+        await _projectRepository.DeleteAsync(project.Id);
     }
 
     public async Task<List<ProjectDto>> GetByUserIdAsync(string userId)
@@ -122,5 +157,27 @@ public class ProjectService : IProjectService
 
         var projects = await _projectRepository.GetByUserIdAsync(user.Id);
         return _mapper.Map<List<ProjectDto>>(projects);
+    }
+
+    private async Task<Project> GetOwnedProjectAsync(int id, string username)
+    {
+        var currentUser = await _userManager.FindByNameAsync(username);
+        if (currentUser == null)
+        {
+            throw new UnauthorizedException("Korisnik nije prijavljen.");
+        }
+
+        var project = await _projectRepository.GetByIdAsync(id);
+        if (project == null)
+        {
+            throw new NotFoundException(id);
+        }
+
+        if (project.UserId != currentUser.Id)
+        {
+            throw new UnauthorizedException("Nemate pravo da pristupite ovom projektu.");
+        }
+
+        return project;
     }
 }

@@ -24,3 +24,18 @@ export const deleteProject = async (id) => {
   const response = await axiosConfig.delete(`/projects/${id}`);
   return response.data;
 };
+
+export const startProject = async (id) => {
+  const response = await axiosConfig.post(`/projects/${id}/start`);
+  return response.data;
+};
+
+export const concludeProject = async (id) => {
+  const response = await axiosConfig.post(`/projects/${id}/conclude`);
+  return response.data;
+};
+
+export const reopenProject = async (id) => {
+  const response = await axiosConfig.post(`/projects/${id}/reopen`);
+  return response.data;
+};

@@ -34,6 +34,30 @@ public class ProjectController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("{id}/start")]
+    public async Task<IActionResult> Start(int id)
+    {
+        var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await _projectService.StartAsync(id, username);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/conclude")]
+    public async Task<IActionResult> Conclude(int id)
+    {
+        var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await _projectService.ConcludeAsync(id, username);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/reopen")]
+    public async Task<IActionResult> Reopen(int id)
+    {
+        var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await _projectService.ReopenAsync(id, username);
+        return Ok(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

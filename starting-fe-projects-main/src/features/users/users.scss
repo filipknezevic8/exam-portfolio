@@ -74,6 +74,7 @@
     gap: 10px;
     padding: 10px;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .user-list {
@@ -84,11 +85,30 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       padding: 12px 15px;
       border-bottom: 1px solid #eee;
 
       &.active {
         background-color: #e8f0fe;
+      }
+
+      .user-row-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .user-full-name {
+        font-weight: 600;
+        color: #222;
+      }
+
+      .user-stats {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.3;
       }
     }
   }

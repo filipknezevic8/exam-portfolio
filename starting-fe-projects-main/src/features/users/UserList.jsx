@@ -9,6 +9,7 @@ import './users.scss';
 const UserList = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
+
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -67,6 +68,14 @@ const UserList = () => {
     }
   };
 
+  const formatDate = (value) => {
+    if (!value) {
+      return '-';
+    }
+
+    return new Date(value).toLocaleDateString();
+  };
+
   return (
     <div className="user-page-wrapper">
       <div className="user-list-container">
@@ -85,13 +94,18 @@ const UserList = () => {
             &gt;
           </button>
         </div>
-        <hr />
+        <hr></hr>
         <div className="user-list">
           {loading && <p>Učitavanje...</p>}
           {error && <p className="error-message">{error}</p>}
           {!loading && !error && users.map((u) => (
             <div key={u.id} className={`user-row ${selectedUserId === u.id ? 'active' : ''}`}>
-              <span>{u.name} {u.surname}</span>
+              <div className="user-row-info">
+                <span className="user-full-name">{u.name} {u.surname}</span>
+                <span className="user-stats">
+                  Kompletirani: {u.completedProjectsCount} | U realizaciji: {u.inProgressProjectsCount} | Poslednji završetak: {formatDate(u.lastCompletedAt)}
+                </span>
+              </div>
               <button className="btn btn-sm" onClick={() => handleShowProjects(u.id)}>
                 Projekti
               </button>

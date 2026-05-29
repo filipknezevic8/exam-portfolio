@@ -2,7 +2,15 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import UserContext from '../../UserContext';
-import { getMyProjects, createProject, updateProject, deleteProject } from './services/projectService';
+import {
+  getMyProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+  startProject,
+  concludeProject,
+  reopenProject
+} from './services/projectService';
 import ProjectList from './ProjectList';
 import './projects.scss';
 
@@ -43,9 +51,15 @@ const MyProjects = () => {
     }
   };
 
+  const getSelectedProject = (projectId) => {
+    return projects.find((project) => project.id === projectId);
+  };
+
   const handleSelectProject = (projectId) => {
-    const project = projects.find((p) => p.id === projectId);
-    if (!project) return;
+    const project = getSelectedProject(projectId);
+    if (!project) {
+      return;
+    }
 
     setIsCreating(false);
     setEditingProjectId(projectId);
@@ -67,9 +81,31 @@ const MyProjects = () => {
     reset({ name: '', description: '', startedAt: '' });
   };
 
+  const handleAction = async (action, projectId) => {
+    setSaving(true);
+    setFormError('');
+
+    try {
+      await action(projectId);
+      await fetchProjects();
+
+      if (editingProjectId === projectId) {
+        setEditingProjectId(null);
+        setSelectedProjectId(null);
+        setIsCreating(false);
+        reset({ name: '', description: '', startedAt: '' });
+      }
+    } catch (err) {
+      setFormError('Greška pri ažuriranju projekta.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const onSubmit = async (data) => {
     setSaving(true);
     setFormError('');
+
     try {
       const dto = {
         name: data.name,
@@ -98,6 +134,7 @@ const MyProjects = () => {
   const handleDelete = async () => {
     setSaving(true);
     setFormError('');
+
     try {
       await deleteProject(editingProjectId);
       await fetchProjects();
@@ -112,13 +149,16 @@ const MyProjects = () => {
     }
   };
 
+  const selectedProject = editingProjectId ? getSelectedProject(editingProjectId) : null;
+  const isCompletedProject = selectedProject && Number(selectedProject.status) === 2;
+  const disableFormFields = isCompletedProject;
   const showForm = isCreating || editingProjectId;
 
   return (
     <div className="my-projects-wrapper">
       <div className="my-projects-left">
         <div className="my-projects-controls">
-          <button className="btn btn-success" onClick={handleNewProject}>
+          <button className="btn btn-success" onClick={handleNewProject} disabled={saving}>
             Dodaj novi projekat
           </button>
         </div>
@@ -135,7 +175,11 @@ const MyProjects = () => {
             projects={projects}
             onSelectProject={handleSelectProject}
             selectedProjectId={selectedProjectId}
+            onStartProject={(projectId) => handleAction(startProject, projectId)}
+            onConcludeProject={(projectId) => handleAction(concludeProject, projectId)}
+            onReopenProject={(projectId) => handleAction(reopenProject, projectId)}
             showAllStatuses={true}
+            actionsDisabled={saving}
           />
         )}
       </div>
@@ -147,11 +191,18 @@ const MyProjects = () => {
 
             {formError && <div className="error-message">{formError}</div>}
 
+            {isCompletedProject && (
+              <div className="info-message">
+                Kompletiran projekat nije moguće menjati. Koristite opciju „Vrati u pripremu“ ako želite da ga ponovo uređujete.
+              </div>
+            )}
+
             <div className="form-group">
               <label>Naziv:</label>
               <input
                 type="text"
                 placeholder="Unesite naziv projekta"
+                disabled={disableFormFields}
                 {...register('name', { required: 'Naziv je obavezan' })}
               />
               {errors.name && <span className="error-message">{errors.name.message}</span>}
@@ -162,6 +213,7 @@ const MyProjects = () => {
               <textarea
                 placeholder="Unesite opis projekta"
                 rows={4}
+                disabled={disableFormFields}
                 {...register('description')}
               />
             </div>
@@ -170,14 +222,17 @@ const MyProjects = () => {
               <label>Datum početka:</label>
               <input
                 type="datetime-local"
+                disabled={disableFormFields}
                 {...register('startedAt')}
               />
             </div>
 
             <div className="form-actions-row">
-              <button type="submit" className="btn btn-primary" disabled={saving}>
-                {saving ? 'Čuvanje...' : 'Sačuvaj'}
-              </button>
+              {!isCompletedProject && (
+                <button type="submit" className="btn btn-primary" disabled={saving}>
+                  {saving ? 'Čuvanje...' : 'Sačuvaj'}
+                </button>
+              )}
 
               {!isCreating && editingProjectId && (
                 <button

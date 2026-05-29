@@ -1,5 +1,6 @@
 using Exam.App.Domain;
 using Exam.App.Domain.Repositories;
+using Exam.App.Services.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Exam.App.Infrastructure.Database.Repositories;
@@ -13,28 +14,39 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public async Task<PaginatedList<ApplicationUser>> GetAllAsync(int page, int pageSize)
+    public async Task<PaginatedList<UserSummaryDto>> GetAllAsync(int page, int pageSize)
     {
-        var usersQuery =
-            from user in _context.Users
-            join userRole in _context.UserRoles on user.Id equals userRole.UserId
-            join role in _context.Roles on userRole.RoleId equals role.Id
-            where role.Name == "User"
-            select user;
+        var query = from user in _context.Users
+                    join userRole in _context.UserRoles on user.Id equals userRole.UserId
+                    join role in _context.Roles on userRole.RoleId equals role.Id
+                    where role.Name == "User"
+                    select new UserSummaryDto
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        Surname = user.Surname,
+                        CompletedProjectsCount = _context.Projects.Count(p => p.UserId == user.Id && p.Status == ProjectStatus.Completed),
+                        InProgressProjectsCount = _context.Projects.Count(p => p.UserId == user.Id && p.Status == ProjectStatus.Published),
+                        LastCompletedAt = _context.Projects
+                            .Where(p => p.UserId == user.Id && p.Status == ProjectStatus.Completed)
+                            .Select(p => p.CompletedAt)
+                            .Max()
+                    };
 
-        usersQuery = usersQuery
+        query = query
             .Distinct()
-            .OrderBy(u => u.Name)
-            .ThenBy(u => u.Surname)
-            .ThenBy(u => u.UserName);
+            .OrderByDescending(u => u.CompletedProjectsCount)
+            .ThenByDescending(u => u.InProgressProjectsCount)
+            .ThenBy(u => u.Name)
+            .ThenBy(u => u.Surname);
 
-        var totalCount = await usersQuery.CountAsync();
+        var totalCount = await query.CountAsync();
 
-        var items = await usersQuery
+        var items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        return new PaginatedList<ApplicationUser>(items, page, pageSize, totalCount);
+        return new PaginatedList<UserSummaryDto>(items, page, pageSize, totalCount);
     }
 }

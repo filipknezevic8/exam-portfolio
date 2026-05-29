@@ -21,7 +21,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       margin-bottom: 8px;
+      flex-wrap: wrap;
 
       .btn-sm {
         padding: 4px 10px;
@@ -33,6 +35,13 @@
       margin: 0;
       font-size: 18px;
       color: #333;
+    }
+
+    .project-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
     }
 
     .project-description {
@@ -49,6 +58,7 @@
       color: #999;
       border-top: 1px solid #f0f0f0;
       padding-top: 8px;
+      flex-wrap: wrap;
 
       .project-status {
         font-weight: 500;
@@ -58,6 +68,7 @@
   }
 }
 
+// My Projects page layout
 .my-projects-wrapper {
   display: flex;
   height: calc(100vh - 110px);
@@ -89,6 +100,17 @@
       color: #333;
     }
 
+    .info-message {
+      margin-bottom: 15px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      background-color: #eef4ff;
+      color: #355;
+      border: 1px solid #c9d9ff;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
     .form-group {
       margin-bottom: 15px;
 
@@ -112,7 +134,8 @@
         }
       }
 
-      input[type="datetime-local"] {
+      input[type="datetime-local"],
+      input[type="text"] {
         width: 100%;
         padding: 10px;
         border: 1px solid #ccc;
@@ -130,6 +153,7 @@
       display: flex;
       gap: 10px;
       margin-top: 20px;
+      flex-wrap: wrap;
     }
   }
 }
